@@ -1,2 +1,27 @@
 ---
-# tasks file for slurm
+# slurm/tasks/main.yml
+#
+- name: os variables
+  ansible.builtin.include_vars: "{{ item }}"
+  tags: [ always ]
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family }}.yml"
+    - default.yml
+
+- name: install
+  ansible.builtin.include_tasks: "{{ item }}"
+  with_first_found:
+    - install_{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml
+    - install_{{ ansible_distribution }}.yml
+    - install_{{ ansible_os_family }}.yml
+    - install.yml
+
+- name: configure munge
+  ansible.builtin.include_tasks: configure_munge.yml
+  when: slurm_munge_key |length >0
+
+- name: configure
+  ansible.builtin.include_tasks: configure.yml
+  tags: [ slurmd ]

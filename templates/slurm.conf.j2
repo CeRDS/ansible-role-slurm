@@ -1,0 +1,32 @@
+# /etc/slurm/slurm.conf
+# https://slurm.schedmd.com/slurm.conf.html
+#
+{% for opt,val in ((slurm_conf_defaults |combine(slurm_conf)).items() |sort) %}
+  {% if (val is defined) and (val |type_debug == "list") %}
+    {% for v in val %}
+{{ opt }}={{ v }}
+    {% endfor %}
+  {% else %}
+{{ opt }}={{ val }}
+  {% endif %}
+{% endfor %}
+
+{% for node in slurm_nodes %}
+  {% if (node is defined) and (node |type_debug == "dict") %}
+    {% if (node.NodeName |type_debug == "list") %}
+      {% for node_name in node.NodeName %}
+NodeName={{ hostvars[node_name]["ansible_hostname"] if node_name in ansible_play_hosts else node_name }} {% for key,val in node.items() %}{% if not key == "NodeName" %}{{ key }}={{ val }} {% endif %}{% endfor %}
+
+      {% endfor %}
+    {% else %}
+{% for key,val in node.items() %}{{ key }}={{ val }} {% endfor %}
+
+    {% endif %}
+  {% else %}
+{{ node }}
+  {% endif %}
+{% endfor %}
+
+{% for host in (groups[slurm_node_group] |default([])) %}
+NodeName={{ host.ansible_hostname }} Boards=1 Sockets={{ host.ansible_processor_count }} CoresPerSocket={{ host.ansible_processor_cores }} ThreadsPerCore={{ host.ansible_processor_threads_per_core }} RealMemory={{ host.ansible_memtotal_mb }}
+{% endfor %}

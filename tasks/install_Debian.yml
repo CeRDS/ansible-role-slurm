@@ -1,0 +1,42 @@
+---
+# slurm/tasks/install_Debian.yml
+#
+- name: slurm user
+  ansible.builtin.user:
+    comment: Slurm user
+    create_home: no
+    home: /nonexistent
+    name: slurm
+    password: '*'
+    shell: /usr/sbin/nologin
+    state: present
+    system: yes
+    uid: "{{ slurm_uid |default(497) }}"
+
+- name: install munge
+  ansible.builtin.apt:
+    cache_valid_time: 86400
+    name: "{{ slurm_munge_packages }}"
+    state: present
+    update_cache: yes
+  when: slurm_munge_key |length >0
+
+- name: install
+  block:
+    - name: upload deb
+      ansible.builtin.copy:
+        dest: /usr/local/src/slurm_{{ slurm_version }}_amd64.deb
+        mode: 0644
+        src: slurm_{{ slurm_version }}_amd64.deb
+
+    - name: install
+      ansible.builtin.apt:
+        deb: /usr/local/src/slurm_{{ slurm_version }}_amd64.deb
+        state: present
+
+    - name: lib extras
+      ansible.builtin.copy:
+        dest: /usr/local/lib/slurm/private-tmpdir.so
+        src: "{{ ansible_distribution_release }}-{{ ansible_architecture }}/private-tmpdir.so"
+  when:
+    - slurm_version is version('19.05.5','>')

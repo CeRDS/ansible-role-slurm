@@ -1,2 +1,16 @@
 ---
 # handlers file for slurm
+#
+- name: reload daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: restart munge
+  ansible.builtin.service:
+    name: "{{ slurm_munge_service }}"
+    state: restarted
+
+- name: restart slurmd
+  ansible.builtin.service:
+    name: "{{ slurm_service }}"
+    state: restarted

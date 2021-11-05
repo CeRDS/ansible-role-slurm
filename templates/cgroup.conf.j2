@@ -1,0 +1,5 @@
+# {{ slurm_confdir }}/cgroup.conf
+# man cgroup.conf
+{% for k,v in slurm_cgroup.items() %}
+{{ k }}={{ v if (v |type_debug != 'bool') else (v |ternary('yes','no')) }}
+{% endfor %}

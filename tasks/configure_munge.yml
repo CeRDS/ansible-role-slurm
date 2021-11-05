@@ -1,0 +1,18 @@
+---
+# slurm/tasks/configure_munge.yml
+#
+- name: munge.key
+  ansible.builtin.copy:
+    content: "{{ slurm_munge_key }}\n"
+    dest: "{{ slurm_munge_confdir }}/munge.key"
+    group: root
+    mode: 0600
+    owner: "{{ slurm_munge_user }}"
+  notify:
+    - restart munge
+
+- name: enable munge service
+  ansible.builtin.service:
+    enabled: yes
+    name: "{{ slurm_munge_service }}"
+    state: started

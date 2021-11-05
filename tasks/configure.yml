@@ -1,0 +1,104 @@
+---
+# slurm/tasks/configure.yml
+#
+- name: systemd
+  ansible.builtin.template:
+    dest: /etc/systemd/system/slurmd.service
+    src: slurmd.service.j2
+  notify:
+    - reload daemon
+    - restart slurmd
+
+- name: etc/slurm confdir
+  ansible.builtin.file:
+    group: root
+    mode: 0755
+    owner: root
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ slurm_confdir }}"
+    - "{{ slurm_confdir }}/epilog.d"
+    - "{{ slurm_confdir }}/prolog.d"
+    - "{{ slurm_confdir }}/plugstack.conf.d"
+
+- name: configure
+  ansible.builtin.template:
+    dest: "{{ slurm_confdir }}/slurm.conf"
+    lstrip_blocks: yes
+    src: slurm.conf.j2
+  notify:
+    - restart slurmd
+
+- name: configure cgroup
+  ansible.builtin.template:
+    dest: "{{ slurm_confdir }}/cgroup.conf"
+    lstrip_blocks: yes
+    src: cgroup.conf.j2
+  notify:
+    - restart slurmd
+- name: cgroup_allowed_devices_file.conf
+  ansible.builtin.copy:
+    content: "{{ slurm_cgroup_allowed_devices }}"
+    dest: "{{ slurm_confdir }}/cgroup_allowed_devices_file.conf"
+  notify:
+    - restart slurmd
+
+- name: job_submit.lua
+  ansible.builtin.copy:
+    dest: "{{ slurm_confdir }}/job_submit.lua"
+    group: root
+    mode: 0755
+    owner: root
+    src: "{{ playbook_dir }}/{{ slurm_job_submit_lua_path }}"
+  notify:
+    - restart slurmd
+  when:
+    - slurm_job_submit_lua_path is defined
+    - slurm_job_submit_lua_path |length >0
+
+- name: epilog
+  ansible.builtin.copy:
+    dest: "{{ slurm_confdir }}/epilog.d/{{ item |basename }}"
+    mode: 0755
+    src: "{{ playbook_dir }}/{{ item }}"
+  when:
+    - slurm_epilog is defined
+    - slurm_epilog |length >0
+  with_items:
+    - "{{ slurm_epilog }}"
+
+- name: prolog
+  ansible.builtin.copy:
+    dest: "{{ slurm_confdir }}/prolog.d/{{ item |basename }}"
+    mode: 0755
+    src: "{{ playbook_dir }}/{{ item }}"
+  when:
+    - slurm_prolog is defined
+    - slurm_prolog |length >0
+  with_items:
+    - "{{ slurm_prolog }}"
+
+- name: SPANK configuration
+  block:
+    - name: etc/slurm/plugstack.conf
+      ansible.builtin.template:
+        dest: "{{ slurm_confdir }}/plugstack.conf"
+        src: plugstack.conf.j2
+
+    - name: etc/slurm/plugstack.conf.d
+      ansible.builtin.copy:
+        dest: "{{ slurm_confdir }}/plugstack.conf.d/{{ item |basename }}"
+        src: "{{ playbook_dir }}/{{ item }}"
+      with_items:
+        - "{{ slurm_plugstack_conf }}"
+  notify:
+    - restart slurmd
+  when:
+    - slurm_plugstack_conf is defined
+    - slurm_plugstack_conf |length >0
+
+- name: enable service
+  ansible.builtin.service:
+    enabled: yes
+    name: "{{ slurm_service }}"

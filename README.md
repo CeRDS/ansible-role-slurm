@@ -1,4 +1,4 @@
-Role Name
+slurm
 =========
 
 A brief description of the role goes here.

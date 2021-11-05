@@ -1,2 +1,7 @@
 ---
 # defaults file for slurm
+#
+slurm_conf: {}
+slurm_conf_server: []
+slurm_node_group: slurm_node
+slurm_munge_key: ""

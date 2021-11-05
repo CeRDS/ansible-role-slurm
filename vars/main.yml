@@ -1,2 +1,49 @@
 ---
 # vars file for slurm
+#
+slurm_prefix: /usr/local
+slurm_confdir: "{{ slurm_prefix }}/etc/slurm"
+slurm_packages: [ slurm ]
+slurm_service: slurmd.service
+slurm_version: 20.02.6.1-6
+slurm_epilog_d: "{{ slurm_confdir }}/epilog.d"
+slurm_prolog_d: "{{ slurm_confdir }}/prolog.d"
+
+slurm_conf_defaults:
+  AccountingStorageType: "accounting_storage/none"
+  AuthType: "auth/munge"
+  DisableRootJobs: "YES"
+  Epilog: "{{ slurm_confdir }}/epilog.d/*"
+  JobAcctGatherFrequency: "task=30,energy=0,network=0,filesystem=0"
+  JobAcctGatherType: "{{ 'jobacct_gather/linux' if ansible_system == 'Linux' else 'jobacct_gather/none' }}"
+  Prolog: "{{ slurm_confdir }}/prolog.d/*"
+  SchedulerType: "sched/backfill"
+  SlurmctldParameters: "enable_configless"
+  SlurmctldDebug: "error"
+  SlurmctldPidFile: "/var/run/slurmctld.pid"
+  SlurmctldPort: 6817
+  SlurmdDebug: "error"
+  SlurmdPidFile: "/var/run/slurmd.pid"
+  SlurmdPort: 6818
+  SlurmdSpoolDir: "/var/spool/slurmd"
+  SlurmUser: slurm
+  SwitchType: "switch/none"
+  # NOTE: see "man cgroup.conf"
+  TaskPlugin: "task/affinity,task/cgroup"
+
+slurm_cgroup_defaults:
+  AllowedDevicesFile: "{{ slurm_confdir }}/cgroup_allowed_devices_file.conf"
+
+slurm_slurmd: "{{ slurm_prefix }}/sbin/slurmd"
+slurm_slurmd_service: slurmd.service
+
+# ????
+slurm_PIDFile: "/run/slurmd.pid"
+slurm_sysconfdir: /etc
+
+# munge
+slurm_munge_packages: [ "munge" ]
+slurm_munge_user: "munge"
+slurm_munge_service: munge.service
+slurm_munge_confdir: /etc/munge
+slurm_munge_version: 0.5.13
