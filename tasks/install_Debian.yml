@@ -37,6 +37,7 @@
     - name: lib extras
       ansible.builtin.copy:
         dest: /usr/local/lib/slurm/private-tmpdir.so
+        force: yes
         src: "{{ ansible_distribution_release }}-{{ ansible_architecture }}/private-tmpdir.so"
   when:
     - slurm_version is version('19.05.5','>')
