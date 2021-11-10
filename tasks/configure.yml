@@ -79,21 +79,38 @@
   with_items:
     - "{{ slurm_prolog }}"
 
-- name: SPANK configuration
-  block:
-    - name: etc/slurm/plugstack.conf
-      ansible.builtin.template:
-        dest: "{{ slurm_confdir }}/plugstack.conf"
-        src: plugstack.conf.j2
-
-    - name: etc/slurm/plugstack.conf.d
-      ansible.builtin.copy:
-        dest: "{{ slurm_confdir }}/plugstack.conf.d/{{ item |basename }}"
-        src: "{{ playbook_dir }}/{{ item }}"
-      with_items:
-        - "{{ slurm_plugstack_conf }}"
+# SPANK
+# https://slurm.schedmd.com/spank.html
+- name: etc/slurm/plugstack.conf
+  ansible.builtin.template:
+    dest: "{{ slurm_confdir }}/plugstack.conf"
+    src: plugstack.conf.j2
   notify:
     - restart slurmd
+
+# https://github.com/hpc2n/spank-private-tmp
+- name: private-tmpdir
+  block:
+    - name: private-tmpdir
+      ansible.builtin.template:
+        dest: "{{ slurm_confdir }}/plugstack.conf.d/private-tmpdir.conf"
+        src: plugstack.conf.d/private-tmpdir.j2
+
+    - name: private-tmpdir epilog
+      ansible.builtin.template:
+        dest: "{{ slurm_confdir }}/epilog.d/private-tmpdir.conf"
+        mode: 0755
+        src: plugstack.conf.d/private-tmpdir-epilog.j2
+  when:
+    - slurm_private_tmpdir is defined
+    - slurm_private_tmpdir |length >0
+
+- name: etc/slurm/plugstack.conf.d
+  ansible.builtin.copy:
+    dest: "{{ slurm_confdir }}/plugstack.conf.d/{{ item |basename }}"
+    src: "{{ playbook_dir }}/{{ item }}"
+  with_items:
+    - "{{ slurm_plugstack_conf }}"
   when:
     - slurm_plugstack_conf is defined
     - slurm_plugstack_conf |length >0

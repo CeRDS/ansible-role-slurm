@@ -34,6 +34,12 @@ slurm_conf_defaults:
 slurm_cgroup_defaults:
   AllowedDevicesFile: "{{ slurm_confdir }}/cgroup_allowed_devices_file.conf"
 
+slurm_private_tmpdir:
+  - base: /tmp/slurm
+    mounts:
+      - /var/tmp
+      - /tmp
+
 slurm_slurmd: "{{ slurm_prefix }}/sbin/slurmd"
 slurm_slurmd_service: slurmd.service
 
