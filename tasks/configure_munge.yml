@@ -13,6 +13,6 @@
 
 - name: enable munge service
   ansible.builtin.service:
-    enabled: yes
+    enabled: true
     name: "{{ slurm_munge_service }}"
     state: started

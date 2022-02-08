@@ -3,7 +3,7 @@
 #
 - name: reload daemon
   ansible.builtin.systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: restart munge
   ansible.builtin.service:

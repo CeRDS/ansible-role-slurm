@@ -3,7 +3,7 @@
 #
 - name: os variables
   ansible.builtin.include_vars: "{{ item }}"
-  tags: [ always ]
+  tags: [always]
   with_first_found:
     - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
     - "{{ ansible_distribution }}.yml"
@@ -24,4 +24,4 @@
 
 - name: configure
   ansible.builtin.include_tasks: configure.yml
-  tags: [ slurmd ]
+  tags: [slurmd]
