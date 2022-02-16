@@ -5,3 +5,33 @@ slurm_conf: {}
 slurm_conf_server: []
 slurm_node_group: slurm_node
 slurm_munge_key: ""
+
+# vars file for slurm
+#
+slurm_prefix: /usr/local
+slurm_confdir: "{{ slurm_prefix }}/etc/slurm"
+slurm_packages: [slurm]
+slurm_service: slurmd.service
+slurm_version: 20.02.6.1-6
+slurm_epilog_d: "{{ slurm_confdir }}/epilog.d"
+slurm_prolog_d: "{{ slurm_confdir }}/prolog.d"
+
+slurm_private_tmpdir:
+  - base: /tmp/slurm
+    mounts:
+      - /var/tmp
+      - /tmp
+
+slurm_slurmd: "{{ slurm_prefix }}/sbin/slurmd"
+slurm_slurmd_service: slurmd.service
+
+# ????
+slurm_PIDFile: "/run/slurmd.pid"
+slurm_sysconfdir: /etc
+
+# munge
+slurm_munge_packages: ["munge"]
+slurm_munge_user: "munge"
+slurm_munge_service: munge.service
+slurm_munge_confdir: /etc/munge
+slurm_munge_version: 0.5.13

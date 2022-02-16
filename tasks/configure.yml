@@ -32,6 +32,13 @@
   notify:
     - restart slurmd
 
+- name: environment
+  ansible.builtin.copy:
+    content: |
+      SLURM_CONF="{{ slurm_confdir }}/slurm.conf"
+    dest: /etc/profile.d/slurm.sh
+    mode: 0644
+
 - name: configure cgroup
   ansible.builtin.template:
     dest: "{{ slurm_confdir }}/cgroup.conf"

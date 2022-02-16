@@ -6,6 +6,7 @@ Documentation=man:slurmd(8)
 
 [Service]
 Type=forking
+Environment="SLURM_CONF={{ slurm_confdir }}/slurm.conf"
 EnvironmentFile=-/etc/default/slurmd
 ExecStart={{ slurm_slurmd |default('/usr/sbin/slurmd') }}{% if (slurm_conf_server |length >0) %} --conf-server {{ slurm_conf_server |join(',') }}{% endif %} $SLURMD_OPTIONS
 ExecReload=/bin/kill -HUP $MAINPID
